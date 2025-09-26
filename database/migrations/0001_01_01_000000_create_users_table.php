@@ -14,8 +14,7 @@ return new class extends Migration
                 name VARCHAR(255) NOT NULL,
                 email VARCHAR(255) NOT NULL UNIQUE,
                 password VARCHAR(255) NOT NULL,
-                created_at TIMESTAMP NULL DEFAULT NULL,
-                updated_at TIMESTAMP NULL DEFAULT NULL
+                created_at TIMESTAMP NULL DEFAULT NULL
             )
         ");
 
@@ -36,7 +35,11 @@ return new class extends Migration
 
     public function down(): void
     {
+        DB::statement('PRAGMA foreign_keys = OFF');
+
         Schema::dropIfExists('sessions');
         Schema::dropIfExists('users');
+
+        DB::statement('PRAGMA foreign_keys = ON');
     }
 };
