@@ -17,6 +17,7 @@ class TestScript extends Command
      */
     public function handle()
     {
+        DB::statement('PRAGMA foreign_keys = OFF;');
         DB::statement("DROP TABLE IF EXISTS user;");
         DB::statement("DROP TABLE IF EXISTS professional;");
         DB::statement("DROP TABLE IF EXISTS project_user;");
@@ -31,6 +32,8 @@ class TestScript extends Command
         DB::statement("DROP TABLE IF EXISTS message;");
         DB::statement("DROP TABLE IF EXISTS species;");
         DB::statement("DROP TABLE IF EXISTS taxonomy;");
+        DB::statement('PRAGMA foreign_keys = ON;');
+
 
         DB::statement(
             "CREATE TABLE user (
@@ -72,7 +75,7 @@ class TestScript extends Command
 
         DB::statement(
             "CREATE TABLE project (
-            project INTEGER PRIMARY KEY AUTOINCREMENT,
+            projectID INTEGER PRIMARY KEY AUTOINCREMENT,
             name VARCHAR(255),
             description TEXT
             );"
@@ -102,8 +105,7 @@ class TestScript extends Command
             email VARCHAR(255) NOT NULL,
             professionalEmail VARCHAR(255),
             dateConfirmed DATE,
-            FOREIGN KEY (meanLongitude) REFERENCES location(meanLongitude),
-            FOREIGN KEY (meanLatitude) REFERENCES location(meanLatitude),
+            FOREIGN KEY (meanLongitude, meanLatitude) REFERENCES location(meanLongitude, meanLatitude),
             FOREIGN KEY (scientificName) REFERENCES species(scientificName),
             FOREIGN KEY (email) REFERENCES user(email),
             FOREIGN KEY (professionalEmail) REFERENCES professional(email)
@@ -195,6 +197,14 @@ class TestScript extends Command
             VALUES ('Macrocystis pyrifera', 'Giant Kelp', 'Sample species for testing purposes', 'Macrocystis');
         ");
 
+        DB::statement("INSERT INTO location (meanLongitude, meanLatitude, name)
+            VALUES ('49.245173', '-125.257978', 'Vancouver Island'),
+            ('49.267324', '-123.263471', 'Wreck Beach'),
+            ('49.330532', '-124.290541', 'EnglishMan River Estuary'),
+            ('49.405967', '-123.469368', 'Plumper Cove'),
+            ('49.451951', '-123.326787', 'Halkett Bay');
+        ");
+
         DB::statement("INSERT INTO user (email, username, password)
         VALUES ('johnSmith@gmail.com', 'jsmithy', '1234'),
                 ('johnDoe@gmail.com', 'johnDoe', '12j3h1k2h3'),
@@ -227,15 +237,51 @@ class TestScript extends Command
              ('Kelp forest monitoring', 'Citizen monitor kelp forests along the coast of vancouver islands');
         ");
 
-        DB::statement("INSERT INTO location (meanLongitude, meanLatitude, name)
-            VALUES ('49.245173', '-125.257978', 'Vancouver Island'),
-            ('49.267324', '-123.263471', 'Wreck Beach'),
-            ('49.330532', '-124.290541', 'EnglishMan River Estuary'),
-            ('49.405967', '-123.469368', 'Plumper Cove'),
-            ('49.451951', '-123.326787', 'Halkett Bay');
+
+        DB::statement("INSERT INTO observation (longitude, latitude, date, quantity, notes, meanLongitude, meanLatitude, scientificName, email, professionalEmail, dateConfirmed)
+            VALUES
+            ('49.267100', '-123.263500', '2025-10-10', 3, 'Observed several kelp fronds near shore.', '49.267324', '-123.263471', 'Macrocystis pyrifera', 'johnSmith@gmail.com', 'Simon@gmail.com', '2025-10-11'),
+            ('49.330600', '-124.290500', '2025-10-12', 1, 'Single kelp spotted in shallow waters.', '49.330532', '-124.290541', 'Macrocystis pyrifera', 'johnDoe@gmail.com', 'rachelResearch@gmail.com', '2025-10-13'),
+            ('49.405900', '-123.469300', '2025-09-30', 5, 'Healthy kelp growth observed in cove.', '49.405967', '-123.469368', 'Macrocystis pyrifera', 'gavinKrebbers@gmail.com', NULL, NULL),
+            ('49.451900', '-123.326700', '2025-10-01', 2, 'Sparse kelp patches noted.', '49.451951', '-123.326787', 'Macrocystis pyrifera', 'janeDoe@gmail.com', 'robertResearch@gmail.com', '2025-10-02'),
+            ('49.245100', '-125.257900', '2025-09-28', 8, 'Large kelp forest area thriving.', '49.245173', '-125.257978', 'Macrocystis pyrifera', 'ssdlkfjsldfjaledfjlsadjfla@gmail.com', 'Simon@gmail.com', '2025-09-29'),
+
+            ('49.267200', '-123.263480', '2025-10-14', 4, 'Observed kelp growing around sea anemones.', '49.267324', '-123.263471', 'Macrocystis pyrifera', 'johnDoe@gmail.com', 'rachelResearch@gmail.com', '2025-10-15'),
+            ('49.330550', '-124.290510', '2025-10-16', 2, 'Small kelp patches near coral structures.', '49.330532', '-124.290541', 'Macrocystis pyrifera', 'johnSmith@gmail.com', NULL, NULL),
+            ('49.245120', '-125.257950', '2025-10-17', 6, 'Multiple young kelp fronds sighted in kelp forest region.', '49.245173', '-125.257978', 'Macrocystis pyrifera', 'gavinKrebbers@gmail.com', 'raoulResearch@gmail.com', '2025-10-18'),
+
+            ('49.405950', '-123.469350', '2025-10-02', 5, 'Several kelp plants found on rocks during low tide.', '49.405967', '-123.469368', 'Macrocystis pyrifera', 'janeDoe@gmail.com', 'rowanResearch@gmail.com', '2025-10-03'),
+            ('49.451930', '-123.326760', '2025-10-04', 3, 'Kelp observed with signs of stress or damage.', '49.451951', '-123.326787', 'Macrocystis pyrifera', 'johnSmith@gmail.com', 'robertResearch@gmail.com', '2025-10-05'),
+            ('49.330520', '-124.290520', '2025-10-06', 7, 'Healthy kelp population noted around reef area.', '49.330532', '-124.290541', 'Macrocystis pyrifera', 'gavinKrebbers@gmail.com', 'Simon@gmail.com', '2025-10-07');
         ");
 
-        // DB::statement("INSERT INTO observation ()");
+
+        DB::statement("INSERT INTO project_observation (projectID, observationID)
+            VALUES
+            (5, 1),
+            (5, 2),
+            (5, 3),
+            (5, 4),
+            (5, 5),
+
+            (1, 6),
+            (1, 7),
+            (1, 8),
+
+            (3, 9),
+            (3, 10),
+            (3, 11);
+            ");
+
+
+
+        DB::statement("INSERT INTO groupChat (id, `name`, created_at)
+            VALUES (0, 'the fish boys', '2025-10-18 14:30:00'),
+                (1, 'the pufferfish boys', '2022-10-18 6:30:00'),
+                (2, 'the coral boys', '1-10-18 14:30:00'),
+                (3, 'empty groupchat', '2025-11-18 14:30:00'),
+                (4, 'dead groupchat because two people in the chat got into a heated argument', '2025-10-18 14:30:00');
+        ");
 
         DB::statement("INSERT INTO groupChat_user (email, id)
             VALUES ('Simon@gmail.com', 0),
@@ -245,20 +291,20 @@ class TestScript extends Command
                     ('robertResearch@gmail.com', 2);
         ");
 
-        DB::statement("INSERT INTO groupChat (id, `name`, created_at)
-        VALUES (0, 'the fish boys', 2025-10-18 14:30:00),
-                (1, 'the pufferfish boys', 2022-10-18 6:30:00),
-                (2, 'the coral boys', 1-10-18 14:30:00),
-                (3, 'empty groupchat', 2025-11-18 14:30:00),
-                (4, 'dead groupchat because two people in the chat got into a heated argument', 2025-10-18 14:30:00);
-        ");
 
-        DB::statement("INSERT INTO message (id, `data`, time_sent, group_chat_id)
-        VALUES (0, 'hi nice to meet you', 2025-10-18 14:30:00, 0),
-                (1, 'hi not nice to meet you', 2025-10-18 14:30:01, 0),
-                (2, 'aslkdjfalsdkfjlaskjfdlsajfalksjdfasdflkjsakdjflawoeifjwoefjoewfjoewijfoewijf', 2025-10-19 16:36:02, 0),
-                (3, 'asdf', 2022-10-18 14:30:00, 0),
-                (4, 'i love clownfish this is the clownfish group', 900-10-18 14:30:00, 1);
+        DB::statement("INSERT INTO message (id, data, time_sent, group_chat_id, email)
+        VALUES
+            (0, 'hi nice to meet you', '2025-10-18 14:30:00', 0, 'Simon@gmail.com'),
+            (1, 'hi not nice to meet you', '2025-10-18 14:30:01', 0, 'rachelResearch@gmail.com'),
+            (2, 'aslkdjfalsdkfjlaskjfdlsajfalksjdfasdflkjsakdjflawoeifjwoefjoewfjoewijfoewijf', '2025-10-19 16:36:02', 0, 'johnSmith@gmail.com'),
+            (3, 'asdf', '2022-10-18 14:30:00', 0, 'johnDoe@gmail.com'),
+            (4, 'I love clownfish, this is the clownfish group', '2025-10-18 14:30:00', 1, 'rachelResearch@gmail.com'),
+            (5, 'hello coral porject peopel ', '2025-10-18 15:00:00', 2, 'robertResearch@gmail.com'),
+            (6, 'wow the tide sure did change today ', '2025-10-19 09:45:00', 3, 'janeDoe@gmail.com'),
+            (7, 'i swa so much kelp you wont beleive it ', '2025-10-19 10:15:00', 4, 'gavinKrebbers@gmail.com'),
+            (8, 'i like petting sturgeons', '2025-10-19 11:00:00', 0, 'Simon@gmail.com'),
+            (9, 'i found 3 star fish', '2025-10-19 11:30:00', 3, 'johnSmith@gmail.com');
+
         ");
     }
 }
